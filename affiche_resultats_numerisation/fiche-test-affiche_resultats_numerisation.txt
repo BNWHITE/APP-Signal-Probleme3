@@ -1,0 +1,105 @@
+============================================================
+  FICHE DE TESTS — affiche_resultats_numerisation
+============================================================
+
+  Identifiant  : FT-PIII-03
+  Module       : affiche_resultats_numerisation
+  Créé par     : G2D
+  Date         : 11 Avril 2026
+
+------------------------------------------------------------
+  SCÉNARIO 1 — Appel nominal Hi-Fi
+------------------------------------------------------------
+  Données   : params Hi-Fi standard (Fe=44100, b=16, 2 canaux)
+               resultats nominaux (SNR=91.87, stockage=605.6 Mo)
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Affichage complet avec tableau et 3× [OK]
+  Réussite  : [ ]
+
+------------------------------------------------------------
+  SCÉNARIO 2 — SNR insuffisant
+------------------------------------------------------------
+  Données   : params Hi-Fi, resultats.SNR = 80.0 dB
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Affichage avec [NON] pour SNR
+  Réussite  : [ ]
+
+------------------------------------------------------------
+  SCÉNARIO 3 — Non compatible CD
+------------------------------------------------------------
+  Données   : params Hi-Fi, resultats.stockage_Mo = 800.0
+               resultats.compatible_cd = false
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Affichage avec [NON] pour compatibilité CD
+  Réussite  : [ ]
+
+------------------------------------------------------------
+  SCÉNARIO 4 — Timbre non respecté
+------------------------------------------------------------
+  Données   : params.Fe = 30000, resultats.timbre_ok = false
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Affichage avec [NON] pour timbre
+  Réussite  : [ ]
+
+------------------------------------------------------------
+  SCÉNARIO 5 — Mono (1 canal)
+------------------------------------------------------------
+  Données   : params.n_canaux = 1, débit et stockage mono
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Affichage correct en mono
+  Réussite  : [ ]
+
+------------------------------------------------------------
+  SCÉNARIO 6 — Haute résolution (24 bits / 96 kHz)
+------------------------------------------------------------
+  Données   : params.Fe = 96000, params.b = 24
+               resultats adaptés (SNR=140, stockage=1976 Mo)
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Affichage correct, [NON] pour CD
+  Réussite  : [ ]
+
+------------------------------------------------------------
+  SCÉNARIO 7 — Qualité téléphone (8 bits / 8 kHz)
+------------------------------------------------------------
+  Données   : params.Fe = 8000, params.b = 8, f_max = 3400
+               resultats basse qualité
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Affichage correct, [NON] CD et timbre
+  Réussite  : [ ]
+
+------------------------------------------------------------
+  SCÉNARIO 8 — Toutes vérifications échouent
+------------------------------------------------------------
+  Données   : SNR < cible, compatible_cd = false, timbre_ok = false
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Trois lignes [NON]
+  Réussite  : [ ]
+
+------------------------------------------------------------
+  SCÉNARIO 9 — Toutes vérifications OK
+------------------------------------------------------------
+  Données   : SNR >= cible, compatible_cd = true, timbre_ok = true
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Trois lignes [OK]
+  Réussite  : [ ]
+
+------------------------------------------------------------
+  SCÉNARIO 10 — Chaîne complète Entrée → Calcul → Sortie
+------------------------------------------------------------
+  Données   : params issus de lire_parametres_numerisation()
+               resultats issus de calcule_numerisation(params, 3600)
+  Action    : affiche_resultats_numerisation(params, resultats)
+  Résultat  : Affichage complet, toutes vérifications [OK]
+  Réussite  : [ ]
+
+============================================================
+  JOURNAL TESTEUR
+============================================================
+
+  Date        | Testeur | Scénarios | Résultat global
+  ------------|---------|-----------|----------------
+              |         |           |
+              |         |           |
+              |         |           |
+
+============================================================

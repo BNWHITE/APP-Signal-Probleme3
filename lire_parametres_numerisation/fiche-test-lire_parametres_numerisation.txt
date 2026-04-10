@@ -1,0 +1,81 @@
+========================================================================
+FICHE DE TEST — lire_parametres_numerisation
+Groupe G2D — APP Signal 2025-2026 — ISEP
+========================================================================
+
+ID          : FT-PIII-01
+Module      : lire_parametres_numerisation
+Créé par    : G2D
+Date        : 11 Avril 2026
+
+------------------------------------------------------------------------
+CONDITIONS PRÉALABLES :
+- MATLAB R2023a ou version ultérieure
+------------------------------------------------------------------------
+
+SCÉNARIO 1 : Type de sortie
+  Données    : Aucune entrée
+  Action     : params = lire_parametres_numerisation()
+  Résultat   : params est une structure MATLAB
+  Réussite   : [ ]
+
+SCÉNARIO 2 : Fréquence minimale
+  Données    : Aucune entrée
+  Action     : params = lire_parametres_numerisation()
+  Résultat   : params.f_min = 20 Hz
+  Réussite   : [ ]
+
+SCÉNARIO 3 : Fréquence maximale
+  Données    : Aucune entrée
+  Action     : params = lire_parametres_numerisation()
+  Résultat   : params.f_max = 20 000 Hz
+  Réussite   : [ ]
+
+SCÉNARIO 4 : SNR cible
+  Données    : Aucune entrée
+  Action     : params = lire_parametres_numerisation()
+  Résultat   : params.SNR_cible = 90 dB
+  Réussite   : [ ]
+
+SCÉNARIO 5 : Tension crête
+  Données    : Aucune entrée
+  Action     : params = lire_parametres_numerisation()
+  Résultat   : params.V_max = 0.5 V (= 500 mV)
+  Réussite   : [ ]
+
+SCÉNARIO 6 : Dynamique totale
+  Données    : Aucune entrée
+  Action     : params = lire_parametres_numerisation()
+  Résultat   : params.A = 2 × V_max = 1 V
+  Réussite   : [ ]
+
+SCÉNARIO 7 : Puissance moyenne
+  Données    : Aucune entrée
+  Action     : params = lire_parametres_numerisation()
+  Résultat   : params.P_moy = 30 mW
+  Réussite   : [ ]
+
+SCÉNARIO 8 : Shannon respecté
+  Données    : Aucune entrée
+  Action     : params = lire_parametres_numerisation()
+  Résultat   : params.Fe >= 2 × f_max = 40 000 Hz
+  Réussite   : [ ]
+
+SCÉNARIO 9 : Nombre de bits suffisant
+  Données    : Aucune entrée
+  Action     : params = lire_parametres_numerisation()
+  Résultat   : params.b >= 16 bits
+  Réussite   : [ ]
+
+SCÉNARIO 10 : SNR atteint avec ces paramètres
+  Données    : Aucune entrée
+  Action     : Calculer SNR = 10*log10(P_moy / (q²/12))
+  Résultat   : SNR >= 90 dB
+  Réussite   : [ ]
+
+========================================================================
+JOURNAL TESTEUR :
+Date        Testeur     Résultat global
+------------------------------------------------------------------------
+11/04/26    G2D         À compléter après exécution
+========================================================================

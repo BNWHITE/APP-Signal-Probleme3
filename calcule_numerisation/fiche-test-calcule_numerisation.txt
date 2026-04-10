@@ -1,0 +1,82 @@
+========================================================================
+FICHE DE TEST — calcule_numerisation
+Groupe G2D — APP Signal 2025-2026 — ISEP
+========================================================================
+
+ID          : FT-PIII-02
+Module      : calcule_numerisation
+Créé par    : G2D
+Date        : 11 Avril 2026
+
+------------------------------------------------------------------------
+CONDITIONS PRÉALABLES :
+- MATLAB R2023a ou version ultérieure
+- La fonction lire_parametres_numerisation doit être accessible
+------------------------------------------------------------------------
+
+SCÉNARIO 1 : Type de sortie
+  Données    : params = lire_parametres_numerisation(), duree = 3600
+  Action     : resultats = calcule_numerisation(params, duree)
+  Résultat   : resultats est une structure
+  Réussite   : [ ]
+
+SCÉNARIO 2 : Pas de quantification
+  Données    : params (A=1 V, b=16)
+  Action     : resultats = calcule_numerisation(params, 3600)
+  Résultat   : q = 1 / 2^16 ≈ 1.526e-05 V
+  Réussite   : [ ]
+
+SCÉNARIO 3 : Puissance bruit de quantification
+  Données    : q calculé au scénario 2
+  Action     : resultats = calcule_numerisation(params, 3600)
+  Résultat   : Pe = q²/12 ≈ 1.94e-11 W
+  Réussite   : [ ]
+
+SCÉNARIO 4 : SNR >= 90 dB
+  Données    : P_moy = 30 mW, Pe du scénario 3
+  Action     : resultats = calcule_numerisation(params, 3600)
+  Résultat   : SNR = 10*log10(0.030 / 1.94e-11) ≈ 91.90 dB >= 90 dB
+  Réussite   : [ ]
+
+SCÉNARIO 5 : Débit mono
+  Données    : Fe = 44100, b = 16
+  Action     : resultats = calcule_numerisation(params, 3600)
+  Résultat   : debit_mono = 44100 × 16 = 705 600 bits/s
+  Réussite   : [ ]
+
+SCÉNARIO 6 : Débit stéréo
+  Données    : Débit mono × 2 canaux
+  Action     : resultats = calcule_numerisation(params, 3600)
+  Résultat   : debit_stereo = 1 411 200 bits/s
+  Réussite   : [ ]
+
+SCÉNARIO 7 : Stockage 1h < 700 Mo
+  Données    : duree = 3600 s
+  Action     : resultats = calcule_numerisation(params, 3600)
+  Résultat   : stockage ≈ 605.6 Mo < 700 Mo
+  Réussite   : [ ]
+
+SCÉNARIO 8 : Compatible CD
+  Données    : Fe=44100, b=16, stockage < 700 Mo
+  Action     : resultats = calcule_numerisation(params, 3600)
+  Résultat   : compatible_cd = true
+  Réussite   : [ ]
+
+SCÉNARIO 9 : Timbre respecté
+  Données    : Fe/2 = 22050 Hz >= f_max = 20000 Hz
+  Action     : resultats = calcule_numerisation(params, 3600)
+  Résultat   : timbre_ok = true
+  Réussite   : [ ]
+
+SCÉNARIO 10 : Proportionnalité du stockage
+  Données    : duree = 3600 et duree = 1800
+  Action     : Comparer stockage(3600) / stockage(1800)
+  Résultat   : Ratio = 2.00
+  Réussite   : [ ]
+
+========================================================================
+JOURNAL TESTEUR :
+Date        Testeur     Résultat global
+------------------------------------------------------------------------
+11/04/26    G2D         À compléter après exécution
+========================================================================

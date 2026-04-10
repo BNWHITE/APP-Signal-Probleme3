@@ -1,32 +1,15 @@
-# Python
-__pycache__/
-*.pyc
-.venv/
-venv/
-
 # MATLAB
 *.asv
 *.m~
+*.slx.r*
 
-# LaTeX
-*.aux
-*.log
-*.out
-*.bbl
-*.blg
-*.toc
-*.lof
-*.lot
-*.fls
-*.fdb_latexmk
-*.synctex.gz
-*.run.xml
-*.bcf
+# Fichiers temporaires Excel
+~$*.xlsx
 
 # OS
 .DS_Store
 Thumbs.db
 
 # IDE
-.vscode/settings.json
+.vscode/
 .idea/
