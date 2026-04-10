@@ -1,0 +1,406 @@
+\documentclass[12pt, a4paper, french]{article}
+
+% --- Packages ---
+\usepackage[utf8]{inputenc}
+\usepackage[T1]{fontenc}
+\usepackage{babel}
+\usepackage{amsmath, amssymb, amsfonts}
+\usepackage{graphicx}
+\usepackage{geometry}
+\usepackage{fancyhdr}
+\usepackage{titlesec}
+\usepackage{hyperref}
+\usepackage{caption}
+\usepackage{subcaption}
+\usepackage{booktabs}
+\usepackage{array}
+\usepackage{float}
+\usepackage{siunitx}
+\usepackage{listings}
+\usepackage{xcolor}
+\usepackage{enumitem}
+\usepackage{tocloft}
+\usepackage[backend=bibtex, style=numeric]{biblatex}
+
+% --- Configuration ---
+\geometry{margin=2.5cm}
+\addbibresource{references.bib}
+
+\hypersetup{
+    colorlinks=true,
+    linkcolor=blue,
+    citecolor=blue,
+    urlcolor=blue,
+    pdfauthor={Groupe XX},
+    pdftitle={Problème III - Numérisation audio haute fidélité},
+}
+
+% --- En-têtes et pieds de page ---
+\pagestyle{fancy}
+\fancyhf{}
+\fancyhead[L]{APP Signal - ISEP 2025-2026}
+\fancyhead[R]{Problème III}
+\fancyfoot[C]{\thepage}
+\fancyfoot[L]{Groupe XX}
+\renewcommand{\headrulewidth}{0.4pt}
+\renewcommand{\footrulewidth}{0.4pt}
+
+% --- Style des listings (code MATLAB) ---
+\lstdefinestyle{matlab}{
+    language=Matlab,
+    basicstyle=\small\ttfamily,
+    keywordstyle=\color{blue}\bfseries,
+    stringstyle=\color{red},
+    commentstyle=\color{green!60!black}\itshape,
+    numbers=left,
+    numberstyle=\tiny\color{gray},
+    numbersep=5pt,
+    frame=single,
+    breaklines=true,
+    tabsize=4,
+    showstringspaces=false,
+}
+
+% --- Commandes personnalisées ---
+\newcommand{\Fe}{F_e}
+\newcommand{\fmax}{f_{\text{max}}}
+\newcommand{\fmin}{f_{\text{min}}}
+\newcommand{\SNR}{\text{SNR}}
+\newcommand{\dB}{\text{dB}}
+\newcommand{\dBm}{\text{dBm}}
+
+% =====================================================================
+\begin{document}
+
+% --- PAGE DE GARDE ---
+\begin{titlepage}
+    \centering
+    \vspace*{2cm}
+    
+    {\Large \textbf{ISEP -- Institut Supérieur d'Électronique de Paris}}\\[0.5cm]
+    {\large APP Composante Signal -- 2025-2026}\\[2cm]
+    
+    \rule{\textwidth}{1pt}\\[0.5cm]
+    {\LARGE \textbf{Problème III}}\\[0.3cm]
+    {\Large \textbf{Numérisation d'un signal audio haute fidélité}}\\[0.5cm]
+    \rule{\textwidth}{1pt}\\[2cm]
+    
+    {\large
+    \begin{tabular}{ll}
+        \textbf{Groupe}   & : XX \\[0.3cm]
+        \textbf{Membres}  & : Nom Prénom 1 \\
+                          & \phantom{:} Nom Prénom 2 \\
+                          & \phantom{:} Nom Prénom 3 \\[0.3cm]
+        \textbf{Tuteur}   & : Nom du tuteur \\[0.3cm]
+        \textbf{Date}     & : \today \\
+    \end{tabular}
+    }
+    
+    \vfill
+    {\small Livrable II -- Rapport sur la résolution du Problème III}
+\end{titlepage}
+
+% --- TABLE DES MATIÈRES ---
+\tableofcontents
+\newpage
+
+% =====================================================================
+% INTRODUCTION
+% =====================================================================
+\section{Introduction}
+
+L'objectif de ce rapport est de concevoir un système de numérisation d'un signal audio en haute fidélité. Le cahier des charges est le suivant :
+
+\begin{itemize}
+    \item Bande de fréquences : de \SI{20}{\hertz} à \SI{20000}{\hertz}
+    \item Rapport signal à bruit (SNR) moyen : \SI{90}{\dB}
+    \item Microphone idéal (bande infinie, aucune distorsion, aucun bruit)
+    \item Dynamique du microphone : $[-\SI{500}{\milli\volt}, +\SI{500}{\milli\volt}]$
+    \item Puissance moyenne en sortie du micro : \SI{30}{\milli\watt}
+\end{itemize}
+
+Nous devons déterminer le schéma fonctionnel complet de la chaîne de numérisation, calculer tous les paramètres nécessaires (fréquence d'échantillonnage, nombre de bits de quantification, conception du filtre anti-repliement), puis évaluer la capacité de stockage requise et la compatibilité avec le standard CD audio.
+
+Ce rapport présente d'abord le schéma fonctionnel de la chaîne de numérisation (section~\ref{sec:schema}), puis le calcul détaillé de chaque paramètre (section~\ref{sec:parametres}), suivi de la conception du filtre anti-repliement (section~\ref{sec:filtre}). Enfin, nous analysons la compatibilité avec le standard CD et le respect du timbre des instruments d'un orchestre symphonique (section~\ref{sec:compatibilite}).
+
+% =====================================================================
+% SCHÉMA FONCTIONNEL
+% =====================================================================
+\section{Schéma fonctionnel de la chaîne de numérisation}
+\label{sec:schema}
+
+La numérisation d'un signal analogique repose sur trois étapes fondamentales, précédées d'un filtrage anti-repliement. Le schéma fonctionnel est présenté en Figure~\ref{fig:schema}.
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=\textwidth]{figures/schema_numerisation.png}
+    \fbox{\parbox{0.9\textwidth}{\centering\vspace{1cm}[Insérer ici le schéma fonctionnel]\\\vspace{0.5cm}
+    Micro $\rightarrow$ Filtre anti-repliement $\rightarrow$ Échantillonneur $\rightarrow$ Quantificateur $\rightarrow$ Codeur\vspace{1cm}}}
+    \caption{Schéma fonctionnel de la chaîne de numérisation}
+    \label{fig:schema}
+\end{figure}
+
+Les blocs sont les suivants :
+\begin{enumerate}
+    \item \textbf{Microphone} : capteur idéal, convertit le signal acoustique en signal électrique $x_c(t)$.
+    \item \textbf{Filtre anti-repliement} : filtre passe-bas de fréquence de coupure $f_c$, élimine les composantes spectrales au-delà de $\Fe/2$ pour garantir le respect du théorème de Shannon.
+    \item \textbf{Échantillonneur} : prélève les valeurs du signal filtré à la fréquence $\Fe$, produisant $x_e(n T_e)$.
+    \item \textbf{Quantificateur (CAN)} : code les amplitudes sur $b$ bits avec un pas de quantification $q$.
+    \item \textbf{Codeur} : met en forme le signal numérique pour le stockage ou la transmission.
+\end{enumerate}
+
+% =====================================================================
+% CALCUL DES PARAMÈTRES
+% =====================================================================
+\section{Calcul des paramètres de numérisation}
+\label{sec:parametres}
+
+\subsection{Fréquence d'échantillonnage}
+
+D'après le \textbf{théorème de Shannon}, pour échantillonner un signal sans perte d'information, il faut :
+\begin{equation}
+    \Fe \geq 2 \cdot \fmax = 2 \times \SI{20000}{\hertz} = \SI{40000}{\hertz}
+    \label{eq:shannon}
+\end{equation}
+
+En pratique, une marge est nécessaire pour permettre la réalisation du filtre anti-repliement (bande de transition non nulle). Le standard CD Audio utilise $\Fe = \SI{44100}{\hertz}$, ce qui offre :
+\begin{itemize}
+    \item $\Fe/2 = \SI{22050}{\hertz} > \fmax = \SI{20000}{\hertz}$ : Shannon respecté.
+    \item Bande de transition : $\Delta f = \Fe/2 - \fmax = \SI{2050}{\hertz}$, suffisante pour un filtre d'ordre raisonnable.
+\end{itemize}
+
+\begin{equation}
+    \boxed{\Fe = \SI{44100}{\hertz}}
+\end{equation}
+
+\subsection{Nombre de bits de quantification}
+
+Le pas de quantification est $q = A / 2^b$, avec $A = 2 V_{\text{max}} = \SI{1}{\volt}$ la dynamique totale.
+
+La puissance du bruit de quantification est :
+\begin{equation}
+    P_e = \frac{q^2}{12} = \frac{A^2}{12 \cdot 2^{2b}}
+    \label{eq:pe}
+\end{equation}
+
+Le rapport signal à bruit de quantification s'écrit :
+\begin{equation}
+    \SNR = 10 \log_{10}\left(\frac{P_{\text{moy}}}{P_e}\right) = 10 \log_{10}\left(\frac{12 \cdot P_{\text{moy}}}{A^2}\right) + 20 \cdot b \cdot \log_{10}(2)
+    \label{eq:snr}
+\end{equation}
+
+En substituant $P_{\text{moy}} = \SI{30}{\milli\watt}$ et $A = \SI{1}{\volt}$ :
+\begin{equation}
+    \SNR = 10 \log_{10}\left(\frac{12 \times 0.030}{1^2}\right) + 6.02 \cdot b = -4.44 + 6.02 \cdot b \quad (\dB)
+\end{equation}
+
+Pour atteindre $\SNR \geq \SI{90}{\dB}$ :
+\begin{equation}
+    b \geq \frac{90 - (-4.44)}{6.02} = \frac{94.44}{6.02} \approx 15.69 \quad \Rightarrow \quad b = 16 \text{ bits}
+\end{equation}
+
+\textbf{Vérification} : avec $b = 16$ bits :
+\begin{align}
+    q &= \frac{1}{2^{16}} = \SI{15.26}{\micro\volt} \\
+    P_e &= \frac{q^2}{12} = \SI{1.94e-11}{\watt} \\
+    \SNR &= 10 \log_{10}\left(\frac{0.030}{1.94 \times 10^{-11}}\right) = \SI{91.90}{\dB} > \SI{90}{\dB} \quad \checkmark
+\end{align}
+
+\begin{equation}
+    \boxed{b = 16 \text{ bits}, \quad \SNR = \SI{91.90}{\dB}}
+\end{equation}
+
+\subsection{Débit binaire}
+
+Le débit binaire pour un enregistrement stéréo est :
+\begin{equation}
+    D = \Fe \times b \times n_{\text{canaux}} = 44100 \times 16 \times 2 = \SI{1411200}{bits/s} \approx \SI{1411.2}{kbits/s}
+    \label{eq:debit}
+\end{equation}
+
+\begin{equation}
+    \boxed{D = \SI{1411.2}{kbits/s} \approx \SI{1.41}{Mbits/s}}
+\end{equation}
+
+\subsection{Capacité de stockage}
+
+Pour une heure de concert stéréo ($T = \SI{3600}{\second}$) :
+\begin{equation}
+    V = D \times T = 1\,411\,200 \times 3600 = 5\,080\,320\,000 \text{ bits} = 635\,040\,000 \text{ octets} \approx \SI{605.6}{\mega\byte}
+\end{equation}
+
+\begin{equation}
+    \boxed{V \approx \SI{605.6}{\mega\byte} \approx \SI{0.59}{\giga\byte}}
+\end{equation}
+
+% =====================================================================
+% FILTRE ANTI-REPLIEMENT
+% =====================================================================
+\section{Conception du filtre anti-repliement}
+\label{sec:filtre}
+
+\subsection{Gabarit du filtre}
+
+Le filtre anti-repliement est un filtre passe-bas dont les paramètres sont déterminés par le contexte :
+
+\begin{table}[H]
+    \centering
+    \caption{Paramètres du gabarit du filtre anti-repliement}
+    \label{tab:gabarit}
+    \begin{tabular}{lll}
+        \toprule
+        \textbf{Paramètre} & \textbf{Symbole} & \textbf{Valeur} \\
+        \midrule
+        Fréquence de coupure       & $f_c$        & \SI{20000}{\hertz} \\
+        Début bande atténuée       & $f_a$        & \SI{22050}{\hertz} \\
+        Bande de transition        & $\Delta f$   & \SI{2050}{\hertz} \\
+        Ondulation bande passante  & $A_{\max}$   & \SI{0.1}{\dB} \\
+        Atténuation bande atténuée & $A_{\min}$   & \SI{90}{\dB} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+\subsection{Justification des paramètres}
+
+\begin{itemize}
+    \item $f_c = \SI{20000}{\hertz}$ : fréquence maximale audible, limite de la bande utile.
+    \item $f_a = \Fe/2 = \SI{22050}{\hertz}$ : au-delà de cette fréquence, les composantes seraient repliées.
+    \item $A_{\min} = \SI{90}{\dB}$ : l'atténuation doit être au moins égale au SNR cible pour que le bruit de repliement soit négligeable devant le bruit de quantification.
+\end{itemize}
+
+\subsection{Résultats de synthèse}
+
+Le filtre a été synthétisé sous MATLAB/Python par la méthode de Parks-McClellan (equiripple). Les résultats sont présentés en Figure~\ref{fig:filtre}.
+
+\begin{figure}[H]
+    \centering
+    % \includegraphics[width=0.9\textwidth]{figures/filtre_anti_repliement.png}
+    \fbox{\parbox{0.8\textwidth}{\centering\vspace{2cm}[Insérer ici les courbes du filtre]\vspace{2cm}}}
+    \caption{Réponse en fréquence du filtre anti-repliement}
+    \label{fig:filtre}
+\end{figure}
+
+% =====================================================================
+% COMPATIBILITÉ
+% =====================================================================
+\section{Compatibilité CD et respect du timbre}
+\label{sec:compatibilite}
+
+\subsection{Compatibilité avec le standard CD Audio}
+
+Le standard CD Audio (Red Book, 1982) spécifie :
+\begin{itemize}
+    \item $\Fe = \SI{44100}{\hertz}$, $b = 16$ bits, stéréo
+    \item Capacité : \SI{700}{\mega\byte}, durée maximale $\approx \SI{80}{min}$
+\end{itemize}
+
+Nos paramètres ($\Fe = \SI{44100}{\hertz}$, $b = 16$ bits, stéréo) sont \textbf{identiques} au standard CD. Le volume de stockage pour 1~heure (\SI{605.6}{\mega\byte}) est inférieur à la capacité d'un CD (\SI{700}{\mega\byte}).
+
+\begin{equation}
+    \boxed{\text{Compatible CD} : \SI{605.6}{\mega\byte} < \SI{700}{\mega\byte} \quad \checkmark}
+\end{equation}
+
+\subsection{Respect du timbre des instruments}
+
+Le timbre d'un instrument est déterminé par le contenu en harmoniques de chaque note jouée. Un orchestre symphonique comprend des instruments dont les harmoniques s'étendent jusqu'à environ \SI{16000}{\hertz} (cymbales) voire \SI{20000}{\hertz}.
+
+Avec $\Fe/2 = \SI{22050}{\hertz}$, toutes les harmoniques audibles sont capturées. Le SNR de \SI{91.90}{\dB} garantit une dynamique suffisante pour restituer les nuances d'un orchestre (dynamique typique : \SI{60}{\dB} à \SI{80}{\dB}).
+
+\begin{equation}
+    \boxed{\text{Timbre respecté : toutes les harmoniques audibles sont capturées} \quad \checkmark}
+\end{equation}
+
+% =====================================================================
+% CONCLUSION
+% =====================================================================
+\section{Conclusion}
+
+La conception du système de numérisation audio haute fidélité aboutit aux paramètres suivants :
+
+\begin{table}[H]
+    \centering
+    \caption{Récapitulatif des paramètres de numérisation}
+    \label{tab:recap}
+    \begin{tabular}{ll}
+        \toprule
+        \textbf{Paramètre} & \textbf{Valeur} \\
+        \midrule
+        Fréquence d'échantillonnage & \SI{44100}{\hertz} \\
+        Nombre de bits               & 16 bits \\
+        Pas de quantification        & \SI{15.26}{\micro\volt} \\
+        SNR de quantification        & \SI{91.90}{\dB} \\
+        Débit stéréo                 & \SI{1411.2}{kbits/s} \\
+        Stockage 1h stéréo           & \SI{605.6}{\mega\byte} \\
+        \bottomrule
+    \end{tabular}
+\end{table}
+
+Ces paramètres sont identiques au standard CD Audio, confirmant que ce format a été conçu précisément pour l'enregistrement audio haute fidélité. Le stockage d'une heure de concert stéréo (\SI{605.6}{\mega\byte}) est compatible avec la capacité d'un CD (\SI{700}{\mega\byte}). Le timbre des instruments d'un orchestre symphonique est intégralement respecté, toutes les harmoniques audibles étant capturées dans la bande $[0, \SI{22050}{\hertz}]$.
+
+Des améliorations pourraient être envisagées avec des formats de plus haute résolution (par exemple DVD-Audio : \SI{96}{\kilo\hertz}/24 bits), offrant un SNR supérieur et une bande passante étendue, au prix d'un débit et d'un stockage plus importants.
+
+% =====================================================================
+% RÉFÉRENCES
+% =====================================================================
+\newpage
+\printbibliography[title={Références}]
+
+% =====================================================================
+% LISTE DES FIGURES ET TABLEAUX
+% =====================================================================
+\newpage
+\listoffigures
+\listoftables
+
+% =====================================================================
+% ANNEXES
+% =====================================================================
+\newpage
+\appendix
+\section{Annexe A : Démonstration du SNR de quantification}
+
+Le bruit de quantification $e(nT_e) = x_e(nT_e) - x_q(nT_e)$ est modélisé comme une variable aléatoire uniformément distribuée sur $[-q/2, +q/2]$, où $q$ est le pas de quantification.
+
+La puissance (variance) de ce bruit est :
+\begin{equation}
+    P_e = \mathbb{E}[e^2] = \int_{-q/2}^{q/2} e^2 \cdot \frac{1}{q} \, de = \frac{1}{q} \left[\frac{e^3}{3}\right]_{-q/2}^{q/2} = \frac{q^2}{12}
+\end{equation}
+
+Avec $q = A/2^b$ :
+\begin{equation}
+    P_e = \frac{A^2}{12 \cdot 2^{2b}}
+\end{equation}
+
+Le SNR de quantification en dB est :
+\begin{equation}
+    \SNR = 10\log_{10}\left(\frac{P_s}{P_e}\right) = 10\log_{10}(P_s) - 10\log_{10}\left(\frac{A^2}{12 \cdot 2^{2b}}\right)
+\end{equation}
+
+Pour un signal sinusoïdal pleine échelle ($P_s = A^2/8$) :
+\begin{equation}
+    \SNR = 10\log_{10}\left(\frac{A^2/8}{A^2/(12 \cdot 2^{2b})}\right) = 10\log_{10}\left(\frac{3}{2} \cdot 2^{2b}\right) = 6.02 \cdot b + 1.76 \; \dB
+\end{equation}
+
+\section{Annexe B : Codes MATLAB}
+
+\textit{Les codes MATLAB sont fournis dans le dossier \texttt{src/} du fichier zip joint.}
+
+% Mode d'emploi
+\section{Annexe C : Mode d'emploi}
+
+\subsection{Exécution des scripts MATLAB}
+\begin{enumerate}
+    \item Ouvrir MATLAB
+    \item Se placer dans le dossier \texttt{src/}
+    \item Exécuter \texttt{main\_probleme3.m} pour la résolution complète
+    \item Les scripts individuels peuvent être exécutés séparément
+\end{enumerate}
+
+\subsection{Exécution des scripts Python}
+\begin{enumerate}
+    \item Installer les dépendances : \texttt{pip install numpy scipy matplotlib}
+    \item Se placer dans le dossier \texttt{python/}
+    \item Exécuter \texttt{python main\_probleme3.py}
+\end{enumerate}
+
+\end{document}
