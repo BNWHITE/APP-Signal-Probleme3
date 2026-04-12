@@ -1,105 +1,98 @@
-============================================================
-  FICHE DE TESTS — affiche_resultats_numerisation
-============================================================
+========================================================================
+FICHE DE TEST — affiche_resultats_numerisation
+Groupe G2D — APP Signal 2025-2026 — ISEP
+========================================================================
 
-  Identifiant  : FT-PIII-03
-  Module       : affiche_resultats_numerisation
-  Créé par     : G2D
-  Date         : 11 Avril 2026
+ID          : FT-PIII-03
+Module      : affiche_resultats_numerisation
+Cree par    : G2D
+Date        : 12 Avril 2026
 
-------------------------------------------------------------
-  SCÉNARIO 1 — Appel nominal Hi-Fi
-------------------------------------------------------------
-  Données   : params Hi-Fi standard (Fe=44100, b=16, 2 canaux)
-               resultats nominaux (SNR=91.87, stockage=605.6 Mo)
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Affichage complet avec tableau et 3× [OK]
-  Réussite  : [ ]
+------------------------------------------------------------------------
+CONDITIONS PREALABLES :
+- MATLAB R2023a ou version ulterieure
+- Les fonctions lire_parametres_numerisation et calcule_numerisation
+  doivent etre accessibles
+------------------------------------------------------------------------
 
-------------------------------------------------------------
-  SCÉNARIO 2 — SNR insuffisant
-------------------------------------------------------------
-  Données   : params Hi-Fi, resultats.SNR = 80.0 dB
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Affichage avec [NON] pour SNR
-  Réussite  : [ ]
+SCENARIO 1 : Appel nominal Hi-Fi
+  Donnees    : params Hi-Fi standard (Fe=44100, b=16, 2 canaux)
+               resultats nominaux (SNR=91.89, stockage=605.62 Mo)
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage complet avec tableau et 3x [OK]
+  Obtenu     : Affichage complet, 3x [OK], aucune erreur
+  Reussite   : [X]
 
-------------------------------------------------------------
-  SCÉNARIO 3 — Non compatible CD
-------------------------------------------------------------
-  Données   : params Hi-Fi, resultats.stockage_Mo = 800.0
+SCENARIO 2 : SNR insuffisant
+  Donnees    : params Hi-Fi, resultats.SNR = 80.0 dB (< 90)
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage avec [NON] pour SNR
+  Obtenu     : Ligne "[NON] SNR = 80.00 dB < 90 dB" affichee
+  Reussite   : [X]
+
+SCENARIO 3 : Non compatible CD (stockage > 700 Mo)
+  Donnees    : params Hi-Fi, resultats.stockage_Mo = 800.0
                resultats.compatible_cd = false
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Affichage avec [NON] pour compatibilité CD
-  Réussite  : [ ]
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage avec [NON] pour compatibilite CD
+  Obtenu     : Ligne "[NON] Non compatible CD" affichee
+  Reussite   : [X]
 
-------------------------------------------------------------
-  SCÉNARIO 4 — Timbre non respecté
-------------------------------------------------------------
-  Données   : params.Fe = 30000, resultats.timbre_ok = false
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Affichage avec [NON] pour timbre
-  Réussite  : [ ]
+SCENARIO 4 : Timbre non respecte
+  Donnees    : params.Fe = 30000, resultats.timbre_ok = false
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage avec [NON] pour timbre
+  Obtenu     : Ligne "[NON] Timbre non respecte" affichee
+  Reussite   : [X]
 
-------------------------------------------------------------
-  SCÉNARIO 5 — Mono (1 canal)
-------------------------------------------------------------
-  Données   : params.n_canaux = 1, débit et stockage mono
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Affichage correct en mono
-  Réussite  : [ ]
+SCENARIO 5 : Mono (1 canal)
+  Donnees    : params.n_canaux = 1, debit et stockage mono
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage correct en mono
+  Obtenu     : Affichage avec debit=705600, stockage=302.8 Mo
+  Reussite   : [X]
 
-------------------------------------------------------------
-  SCÉNARIO 6 — Haute résolution (24 bits / 96 kHz)
-------------------------------------------------------------
-  Données   : params.Fe = 96000, params.b = 24
-               resultats adaptés (SNR=140, stockage=1976 Mo)
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Affichage correct, [NON] pour CD
-  Réussite  : [ ]
+SCENARIO 6 : Haute resolution (24 bits / 96 kHz)
+  Donnees    : params.Fe = 96000, params.b = 24
+               resultats adaptes (SNR=140, stockage=1976 Mo)
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage correct, [NON] pour CD
+  Obtenu     : Ligne "[NON] Non compatible CD" affichee
+  Reussite   : [X]
 
-------------------------------------------------------------
-  SCÉNARIO 7 — Qualité téléphone (8 bits / 8 kHz)
-------------------------------------------------------------
-  Données   : params.Fe = 8000, params.b = 8, f_max = 3400
-               resultats basse qualité
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Affichage correct, [NON] CD et timbre
-  Réussite  : [ ]
+SCENARIO 7 : Qualite telephone (8 bits / 8 kHz)
+  Donnees    : params.Fe = 8000, params.b = 8, f_max = 3400
+               resultats basse qualite (SNR=43.8, stockage=54.9 Mo)
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage correct, [NON] CD et timbre
+  Obtenu     : [NON] pour CD et timbre affiches
+  Reussite   : [X]
 
-------------------------------------------------------------
-  SCÉNARIO 8 — Toutes vérifications échouent
-------------------------------------------------------------
-  Données   : SNR < cible, compatible_cd = false, timbre_ok = false
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Trois lignes [NON]
-  Réussite  : [ ]
+SCENARIO 8 : Toutes verifications echouent
+  Donnees    : SNR=40 < 90, compatible_cd=false, timbre_ok=false
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Trois lignes [NON]
+  Obtenu     : 3x [NON] affiches
+  Reussite   : [X]
 
-------------------------------------------------------------
-  SCÉNARIO 9 — Toutes vérifications OK
-------------------------------------------------------------
-  Données   : SNR >= cible, compatible_cd = true, timbre_ok = true
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Trois lignes [OK]
-  Réussite  : [ ]
+SCENARIO 9 : Toutes verifications OK
+  Donnees    : SNR=95 >= 90, compatible_cd=true, timbre_ok=true
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Trois lignes [OK]
+  Obtenu     : 3x [OK] affiches
+  Reussite   : [X]
 
-------------------------------------------------------------
-  SCÉNARIO 10 — Chaîne complète Entrée → Calcul → Sortie
-------------------------------------------------------------
-  Données   : params issus de lire_parametres_numerisation()
+SCENARIO 10 : Chaine complete Entree -> Calcul -> Sortie
+  Donnees    : params issus de lire_parametres_numerisation()
                resultats issus de calcule_numerisation(params, 3600)
-  Action    : affiche_resultats_numerisation(params, resultats)
-  Résultat  : Affichage complet, toutes vérifications [OK]
-  Réussite  : [ ]
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage complet, toutes verifications [OK]
+  Obtenu     : Affichage complet, SNR=91.89dB [OK], CD [OK], Timbre [OK]
+  Reussite   : [X]
 
-============================================================
-  JOURNAL TESTEUR
-============================================================
-
-  Date        | Testeur | Scénarios | Résultat global
-  ------------|---------|-----------|----------------
-              |         |           |
-              |         |           |
-              |         |           |
-
-============================================================
+========================================================================
+JOURNAL TESTEUR :
+Date        Testeur     Scenarios   Resultat global
+------------------------------------------------------------------------
+12/04/26    G2D         10 / 10     TOUS OK
+========================================================================

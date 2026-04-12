@@ -5,77 +5,87 @@ Groupe G2D — APP Signal 2025-2026 — ISEP
 
 ID          : FT-PIII-01
 Module      : lire_parametres_numerisation
-Créé par    : G2D
-Date        : 11 Avril 2026
+Cree par    : G2D
+Date        : 12 Avril 2026
 
 ------------------------------------------------------------------------
-CONDITIONS PRÉALABLES :
-- MATLAB R2023a ou version ultérieure
+CONDITIONS PREALABLES :
+- MATLAB R2023a ou version ulterieure
 ------------------------------------------------------------------------
 
-SCÉNARIO 1 : Type de sortie
-  Données    : Aucune entrée
+SCENARIO 1 : Type de sortie
+  Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Résultat   : params est une structure MATLAB
-  Réussite   : [ ]
+  Attendu    : params est une structure MATLAB
+  Obtenu     : params est une structure MATLAB
+  Reussite   : [X]
 
-SCÉNARIO 2 : Fréquence minimale
-  Données    : Aucune entrée
+SCENARIO 2 : Frequence minimale
+  Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Résultat   : params.f_min = 20 Hz
-  Réussite   : [ ]
+  Attendu    : params.f_min = 20 Hz
+  Obtenu     : params.f_min = 20 Hz
+  Reussite   : [X]
 
-SCÉNARIO 3 : Fréquence maximale
-  Données    : Aucune entrée
+SCENARIO 3 : Frequence maximale
+  Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Résultat   : params.f_max = 20 000 Hz
-  Réussite   : [ ]
+  Attendu    : params.f_max = 20 000 Hz
+  Obtenu     : params.f_max = 20 000 Hz
+  Reussite   : [X]
 
-SCÉNARIO 4 : SNR cible
-  Données    : Aucune entrée
+SCENARIO 4 : SNR cible
+  Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Résultat   : params.SNR_cible = 90 dB
-  Réussite   : [ ]
+  Attendu    : params.SNR_cible = 90 dB
+  Obtenu     : params.SNR_cible = 90 dB
+  Reussite   : [X]
 
-SCÉNARIO 5 : Tension crête
-  Données    : Aucune entrée
+SCENARIO 5 : Tension crete
+  Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Résultat   : params.V_max = 0.5 V (= 500 mV)
-  Réussite   : [ ]
+  Attendu    : params.V_max = 0.5 V (= 500 mV)
+  Obtenu     : params.V_max = 0.5 V
+  Reussite   : [X]
 
-SCÉNARIO 6 : Dynamique totale
-  Données    : Aucune entrée
+SCENARIO 6 : Dynamique totale
+  Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Résultat   : params.A = 2 × V_max = 1 V
-  Réussite   : [ ]
+  Attendu    : params.A = 2 * V_max = 1 V
+  Obtenu     : params.A = 1 V
+  Reussite   : [X]
 
-SCÉNARIO 7 : Puissance moyenne
-  Données    : Aucune entrée
+SCENARIO 7 : Puissance moyenne
+  Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Résultat   : params.P_moy = 30 mW
-  Réussite   : [ ]
+  Attendu    : params.P_moy = 30 mW = 0.030 W
+  Obtenu     : params.P_moy = 0.030 W
+  Reussite   : [X]
 
-SCÉNARIO 8 : Shannon respecté
-  Données    : Aucune entrée
+SCENARIO 8 : Shannon respecte (Fe >= 2 * f_max)
+  Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Résultat   : params.Fe >= 2 × f_max = 40 000 Hz
-  Réussite   : [ ]
+  Attendu    : params.Fe >= 2 * 20000 = 40 000 Hz
+  Obtenu     : params.Fe = 44 100 Hz >= 40 000 Hz
+  Reussite   : [X]
 
-SCÉNARIO 9 : Nombre de bits suffisant
-  Données    : Aucune entrée
+SCENARIO 9 : Nombre de bits suffisant (b >= 16)
+  Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Résultat   : params.b >= 16 bits
-  Réussite   : [ ]
+  Attendu    : params.b >= 16 bits
+  Obtenu     : params.b = 16 bits
+  Reussite   : [X]
 
-SCÉNARIO 10 : SNR atteint avec ces paramètres
-  Données    : Aucune entrée
-  Action     : Calculer SNR = 10*log10(P_moy / (q²/12))
-  Résultat   : SNR >= 90 dB
-  Réussite   : [ ]
+SCENARIO 10 : SNR atteint avec ces parametres
+  Donnees    : q = 1/2^16 = 1.5259e-05 V, Pe = q^2/12 = 1.9403e-11 W
+  Action     : SNR = 10*log10(0.030 / 1.9403e-11) = 91.89 dB
+  Attendu    : SNR >= 90 dB
+  Obtenu     : SNR = 91.89 dB >= 90 dB
+  Reussite   : [X]
 
 ========================================================================
 JOURNAL TESTEUR :
-Date        Testeur     Résultat global
+Date        Testeur     Scenarios   Resultat global
 ------------------------------------------------------------------------
-11/04/26    G2D         À compléter après exécution
+12/04/26    G2D         10 / 10     TOUS OK
 ========================================================================

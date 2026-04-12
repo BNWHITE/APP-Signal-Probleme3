@@ -6,18 +6,19 @@
 %   G2D
 %
 % DATE :
-%   11 Avril 2026
+%   12 Avril 2026
 %
 % DESCRIPTION :
 %   Script de test unitaire pour la fonction
 %   lire_parametres_numerisation.
-%   10 cas de test vérifiant la cohérence des paramètres lus.
+%   10 cas de test verifiant la coherence des parametres
+%   lus par rapport au cahier des charges.
 %
 % FONCTION TESTEE :
 %   lire_parametres_numerisation()
 %
 % MODIFICATIONS :
-%   Aucune
+%   12/04/26 — Ajout des resultats numeriques attendus et resume
 % #------------------------------------------
 
 clear all; close all; clc;
@@ -26,39 +27,69 @@ fprintf('=== TEST lire_parametres_numerisation ===\n\n');
 
 params = lire_parametres_numerisation();
 
-%% Cas 1 : La structure est bien renvoyée
-fprintf('Cas 1  : params est une structure → %s\n', iif(isstruct(params),'OK','ECHEC'));
+nb_ok = 0;
+nb_total = 10;
+
+%% Cas 1 : La structure est bien renvoyee
+r1 = isstruct(params);
+nb_ok = nb_ok + r1;
+fprintf('Cas 1  : params est une structure           -> %s\n', iif(r1,'OK','ECHEC'));
 
 %% Cas 2 : f_min = 20 Hz
-fprintf('Cas 2  : f_min = %g Hz (attendu 20) → %s\n', params.f_min, iif(params.f_min==20,'OK','ECHEC'));
+r2 = (params.f_min == 20);
+nb_ok = nb_ok + r2;
+fprintf('Cas 2  : f_min = %g Hz (attendu 20)         -> %s\n', params.f_min, iif(r2,'OK','ECHEC'));
 
 %% Cas 3 : f_max = 20 000 Hz
-fprintf('Cas 3  : f_max = %g Hz (attendu 20000) → %s\n', params.f_max, iif(params.f_max==20000,'OK','ECHEC'));
+r3 = (params.f_max == 20000);
+nb_ok = nb_ok + r3;
+fprintf('Cas 3  : f_max = %g Hz (attendu 20000)      -> %s\n', params.f_max, iif(r3,'OK','ECHEC'));
 
 %% Cas 4 : SNR_cible = 90 dB
-fprintf('Cas 4  : SNR_cible = %g dB (attendu 90) → %s\n', params.SNR_cible, iif(params.SNR_cible==90,'OK','ECHEC'));
+r4 = (params.SNR_cible == 90);
+nb_ok = nb_ok + r4;
+fprintf('Cas 4  : SNR_cible = %g dB (attendu 90)     -> %s\n', params.SNR_cible, iif(r4,'OK','ECHEC'));
 
 %% Cas 5 : V_max = 0.5 V
-fprintf('Cas 5  : V_max = %g V (attendu 0.5) → %s\n', params.V_max, iif(params.V_max==0.5,'OK','ECHEC'));
+r5 = (params.V_max == 0.5);
+nb_ok = nb_ok + r5;
+fprintf('Cas 5  : V_max = %g V (attendu 0.5)         -> %s\n', params.V_max, iif(r5,'OK','ECHEC'));
 
 %% Cas 6 : A = 2*V_max = 1 V
-fprintf('Cas 6  : A = %g V (attendu 1) → %s\n', params.A, iif(params.A==1,'OK','ECHEC'));
+r6 = (params.A == 1);
+nb_ok = nb_ok + r6;
+fprintf('Cas 6  : A = %g V (attendu 1)               -> %s\n', params.A, iif(r6,'OK','ECHEC'));
 
-%% Cas 7 : P_moy = 30 mW
-fprintf('Cas 7  : P_moy = %g mW (attendu 30) → %s\n', params.P_moy*1000, iif(params.P_moy==30e-3,'OK','ECHEC'));
+%% Cas 7 : P_moy = 30 mW = 0.030 W
+r7 = (params.P_moy == 30e-3);
+nb_ok = nb_ok + r7;
+fprintf('Cas 7  : P_moy = %.1f mW (attendu 30)       -> %s\n', params.P_moy*1000, iif(r7,'OK','ECHEC'));
 
-%% Cas 8 : Fe respecte Shannon (Fe >= 2*f_max = 40 000)
-fprintf('Cas 8  : Fe = %d Hz >= 2*f_max = %d Hz → %s\n', params.Fe, 2*params.f_max, iif(params.Fe>=2*params.f_max,'OK','ECHEC'));
+%% Cas 8 : Fe respecte Shannon (Fe >= 2*f_max = 40 000 Hz)
+r8 = (params.Fe >= 2*params.f_max);
+nb_ok = nb_ok + r8;
+fprintf('Cas 8  : Fe = %d Hz >= 2*f_max = %d Hz      -> %s\n', params.Fe, 2*params.f_max, iif(r8,'OK','ECHEC'));
 
 %% Cas 9 : b >= 16 bits (minimum standard CD)
-fprintf('Cas 9  : b = %d bits >= 16 → %s\n', params.b, iif(params.b>=16,'OK','ECHEC'));
+r9 = (params.b >= 16);
+nb_ok = nb_ok + r9;
+fprintf('Cas 9  : b = %d bits >= 16                   -> %s\n', params.b, iif(r9,'OK','ECHEC'));
 
-%% Cas 10 : Le SNR avec ces paramètres atteint bien la cible
+%% Cas 10 : Le SNR obtenu avec ces parametres atteint la cible
 q  = params.A / (2^params.b);
 Pe = q^2 / 12;
 SNR_obtenu = 10*log10(params.P_moy / Pe);
-fprintf('Cas 10 : SNR obtenu = %.2f dB >= %d dB → %s\n', SNR_obtenu, params.SNR_cible, iif(SNR_obtenu>=params.SNR_cible,'OK','ECHEC'));
+r10 = (SNR_obtenu >= params.SNR_cible);
+nb_ok = nb_ok + r10;
+fprintf('Cas 10 : SNR obtenu = %.2f dB >= %d dB      -> %s\n', SNR_obtenu, params.SNR_cible, iif(r10,'OK','ECHEC'));
 
+%% Resume
+fprintf('\n--- Resume : %d / %d cas reussis ---\n', nb_ok, nb_total);
+if nb_ok == nb_total
+    fprintf('>>> TOUS LES TESTS PASSENT <<<\n');
+else
+    fprintf('>>> %d TEST(S) EN ECHEC <<<\n', nb_total - nb_ok);
+end
 fprintf('\n=== FIN ===\n');
 
-function s = iif(c,a,b); if c, s=a; else s=b; end; end
+function s = iif(c, a, b); if c, s = a; else, s = b; end; end

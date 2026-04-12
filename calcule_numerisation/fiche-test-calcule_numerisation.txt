@@ -5,78 +5,88 @@ Groupe G2D — APP Signal 2025-2026 — ISEP
 
 ID          : FT-PIII-02
 Module      : calcule_numerisation
-Créé par    : G2D
-Date        : 11 Avril 2026
+Cree par    : G2D
+Date        : 12 Avril 2026
 
 ------------------------------------------------------------------------
-CONDITIONS PRÉALABLES :
-- MATLAB R2023a ou version ultérieure
-- La fonction lire_parametres_numerisation doit être accessible
+CONDITIONS PREALABLES :
+- MATLAB R2023a ou version ulterieure
+- La fonction lire_parametres_numerisation doit etre accessible
 ------------------------------------------------------------------------
 
-SCÉNARIO 1 : Type de sortie
-  Données    : params = lire_parametres_numerisation(), duree = 3600
+SCENARIO 1 : Type de sortie
+  Donnees    : params = lire_parametres_numerisation(), duree = 3600
   Action     : resultats = calcule_numerisation(params, duree)
-  Résultat   : resultats est une structure
-  Réussite   : [ ]
+  Attendu    : resultats est une structure
+  Obtenu     : resultats est une structure
+  Reussite   : [X]
 
-SCÉNARIO 2 : Pas de quantification
-  Données    : params (A=1 V, b=16)
+SCENARIO 2 : Pas de quantification
+  Donnees    : params (A=1 V, b=16)
   Action     : resultats = calcule_numerisation(params, 3600)
-  Résultat   : q = 1 / 2^16 ≈ 1.526e-05 V
-  Réussite   : [ ]
+  Attendu    : q = A / 2^b = 1 / 65536 = 1.5259e-05 V
+  Obtenu     : q = 1.5259e-05 V
+  Reussite   : [X]
 
-SCÉNARIO 3 : Puissance bruit de quantification
-  Données    : q calculé au scénario 2
+SCENARIO 3 : Puissance bruit de quantification
+  Donnees    : q = 1.5259e-05 V (scenario 2)
   Action     : resultats = calcule_numerisation(params, 3600)
-  Résultat   : Pe = q²/12 ≈ 1.94e-11 W
-  Réussite   : [ ]
+  Attendu    : Pe = q^2/12 = (1.5259e-05)^2/12 = 1.9403e-11 W
+  Obtenu     : Pe = 1.9403e-11 W
+  Reussite   : [X]
 
-SCÉNARIO 4 : SNR >= 90 dB
-  Données    : P_moy = 30 mW, Pe du scénario 3
+SCENARIO 4 : SNR >= 90 dB
+  Donnees    : P_moy = 30 mW = 0.030 W, Pe = 1.9403e-11 W
   Action     : resultats = calcule_numerisation(params, 3600)
-  Résultat   : SNR = 10*log10(0.030 / 1.94e-11) ≈ 91.90 dB >= 90 dB
-  Réussite   : [ ]
+  Attendu    : SNR = 10*log10(0.030 / 1.9403e-11) = 91.89 dB >= 90 dB
+  Obtenu     : SNR = 91.89 dB
+  Reussite   : [X]
 
-SCÉNARIO 5 : Débit mono
-  Données    : Fe = 44100, b = 16
+SCENARIO 5 : Debit mono
+  Donnees    : Fe = 44100 Hz, b = 16 bits
   Action     : resultats = calcule_numerisation(params, 3600)
-  Résultat   : debit_mono = 44100 × 16 = 705 600 bits/s
-  Réussite   : [ ]
+  Attendu    : debit_mono = 44100 * 16 = 705 600 bits/s
+  Obtenu     : debit_mono = 705 600 bits/s
+  Reussite   : [X]
 
-SCÉNARIO 6 : Débit stéréo
-  Données    : Débit mono × 2 canaux
+SCENARIO 6 : Debit stereo
+  Donnees    : debit_mono = 705 600 bits/s, n_canaux = 2
   Action     : resultats = calcule_numerisation(params, 3600)
-  Résultat   : debit_stereo = 1 411 200 bits/s
-  Réussite   : [ ]
+  Attendu    : debit_stereo = 705600 * 2 = 1 411 200 bits/s
+  Obtenu     : debit_stereo = 1 411 200 bits/s
+  Reussite   : [X]
 
-SCÉNARIO 7 : Stockage 1h < 700 Mo
-  Données    : duree = 3600 s
+SCENARIO 7 : Stockage 1h < 700 Mo
+  Donnees    : duree = 3600 s, debit_stereo = 1 411 200 bits/s
   Action     : resultats = calcule_numerisation(params, 3600)
-  Résultat   : stockage ≈ 605.6 Mo < 700 Mo
-  Réussite   : [ ]
+  Attendu    : stockage = 1411200*3600/8/1024^2 = 605.62 Mo < 700 Mo
+  Obtenu     : stockage = 605.62 Mo
+  Reussite   : [X]
 
-SCÉNARIO 8 : Compatible CD
-  Données    : Fe=44100, b=16, stockage < 700 Mo
+SCENARIO 8 : Compatible CD
+  Donnees    : Fe=44100, b=16, stockage=605.62 Mo < 700 Mo
   Action     : resultats = calcule_numerisation(params, 3600)
-  Résultat   : compatible_cd = true
-  Réussite   : [ ]
+  Attendu    : compatible_cd = true
+  Obtenu     : compatible_cd = true (1)
+  Reussite   : [X]
 
-SCÉNARIO 9 : Timbre respecté
-  Données    : Fe/2 = 22050 Hz >= f_max = 20000 Hz
+SCENARIO 9 : Timbre respecte
+  Donnees    : Fe/2 = 22050 Hz, f_max = 20000 Hz
   Action     : resultats = calcule_numerisation(params, 3600)
-  Résultat   : timbre_ok = true
-  Réussite   : [ ]
+  Attendu    : timbre_ok = true (22050 >= 20000)
+  Obtenu     : timbre_ok = true (1)
+  Reussite   : [X]
 
-SCÉNARIO 10 : Proportionnalité du stockage
-  Données    : duree = 3600 et duree = 1800
+SCENARIO 10 : Proportionnalite du stockage
+  Donnees    : duree1 = 3600 s, duree2 = 1800 s
   Action     : Comparer stockage(3600) / stockage(1800)
-  Résultat   : Ratio = 2.00
-  Réussite   : [ ]
+  Attendu    : Ratio = 2.00
+  Obtenu     : Ratio = 605.62 / 302.81 = 2.00
+  Reussite   : [X]
 
 ========================================================================
 JOURNAL TESTEUR :
-Date        Testeur     Résultat global
+Date        Testeur     Scenarios   Resultat global
 ------------------------------------------------------------------------
-11/04/26    G2D         À compléter après exécution
+12/04/26    G2D         10 / 10     TOUS OK
 ========================================================================
