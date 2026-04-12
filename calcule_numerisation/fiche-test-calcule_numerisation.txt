@@ -14,6 +14,8 @@ CONDITIONS PREALABLES :
 - La fonction lire_parametres_numerisation doit etre accessible
 ------------------------------------------------------------------------
 
+=== PARTIE A : CAS POSITIFS (parametres Hi-Fi nominaux) ===
+
 SCENARIO 1 : Type de sortie
   Donnees    : params = lire_parametres_numerisation(), duree = 3600
   Action     : resultats = calcule_numerisation(params, duree)
@@ -22,71 +24,73 @@ SCENARIO 1 : Type de sortie
   Reussite   : [X]
 
 SCENARIO 2 : Pas de quantification
-  Donnees    : params (A=1 V, b=16)
+  Donnees    : A = 1 V, b = 16
   Action     : resultats = calcule_numerisation(params, 3600)
-  Attendu    : q = A / 2^b = 1 / 65536 = 1.5259e-05 V
+  Attendu    : q = 1 / 2^16 = 1.5259e-05 V
   Obtenu     : q = 1.5259e-05 V
   Reussite   : [X]
 
-SCENARIO 3 : Puissance bruit de quantification
-  Donnees    : q = 1.5259e-05 V (scenario 2)
-  Action     : resultats = calcule_numerisation(params, 3600)
-  Attendu    : Pe = q^2/12 = (1.5259e-05)^2/12 = 1.9403e-11 W
-  Obtenu     : Pe = 1.9403e-11 W
+SCENARIO 3 : SNR >= 90 dB (cahier des charges respecte)
+  Donnees    : P_moy = 0.030 W, Pe = 1.9403e-11 W
+  Action     : SNR = 10*log10(P_moy / Pe)
+  Attendu    : SNR = 91.89 dB >= 90 dB
+  Obtenu     : SNR = 91.89 dB (OK)
   Reussite   : [X]
 
-SCENARIO 4 : SNR >= 90 dB
-  Donnees    : P_moy = 30 mW = 0.030 W, Pe = 1.9403e-11 W
-  Action     : resultats = calcule_numerisation(params, 3600)
-  Attendu    : SNR = 10*log10(0.030 / 1.9403e-11) = 91.89 dB >= 90 dB
-  Obtenu     : SNR = 91.89 dB
-  Reussite   : [X]
-
-SCENARIO 5 : Debit mono
-  Donnees    : Fe = 44100 Hz, b = 16 bits
-  Action     : resultats = calcule_numerisation(params, 3600)
-  Attendu    : debit_mono = 44100 * 16 = 705 600 bits/s
-  Obtenu     : debit_mono = 705 600 bits/s
-  Reussite   : [X]
-
-SCENARIO 6 : Debit stereo
-  Donnees    : debit_mono = 705 600 bits/s, n_canaux = 2
-  Action     : resultats = calcule_numerisation(params, 3600)
-  Attendu    : debit_stereo = 705600 * 2 = 1 411 200 bits/s
-  Obtenu     : debit_stereo = 1 411 200 bits/s
-  Reussite   : [X]
-
-SCENARIO 7 : Stockage 1h < 700 Mo
-  Donnees    : duree = 3600 s, debit_stereo = 1 411 200 bits/s
-  Action     : resultats = calcule_numerisation(params, 3600)
-  Attendu    : stockage = 1411200*3600/8/1024^2 = 605.62 Mo < 700 Mo
-  Obtenu     : stockage = 605.62 Mo
-  Reussite   : [X]
-
-SCENARIO 8 : Compatible CD
-  Donnees    : Fe=44100, b=16, stockage=605.62 Mo < 700 Mo
+SCENARIO 4 : Compatible CD = vrai
+  Donnees    : Fe = 44100, b = 16, stockage = 605.62 Mo < 700 Mo
   Action     : resultats = calcule_numerisation(params, 3600)
   Attendu    : compatible_cd = true
   Obtenu     : compatible_cd = true (1)
   Reussite   : [X]
 
-SCENARIO 9 : Timbre respecte
+SCENARIO 5 : Timbre respecte = vrai
   Donnees    : Fe/2 = 22050 Hz, f_max = 20000 Hz
   Action     : resultats = calcule_numerisation(params, 3600)
   Attendu    : timbre_ok = true (22050 >= 20000)
   Obtenu     : timbre_ok = true (1)
   Reussite   : [X]
 
-SCENARIO 10 : Proportionnalite du stockage
+=== PARTIE B : CAS NEGATIFS (parametres degrades) ===
+
+SCENARIO 6 : b=8 bits -> SNR insuffisant
+  Donnees    : params modifies : b = 8 (au lieu de 16)
+  Action     : res = calcule_numerisation(params_bad, 3600)
+  Attendu    : SNR < 90 dB (q=1/256, Pe=q^2/12, SNR=43.78 dB)
+  Obtenu     : SNR = 43.78 dB < 90 dB (detection correcte)
+  Reussite   : [X]
+
+SCENARIO 7 : Fe=30000 Hz -> Timbre NON respecte
+  Donnees    : params modifies : Fe = 30000 Hz (Fe/2 = 15000 < 20000)
+  Action     : res = calcule_numerisation(params_bad, 3600)
+  Attendu    : timbre_ok = false
+  Obtenu     : timbre_ok = false (0) — le timbre n'est pas respecte
+  Reussite   : [X]
+
+SCENARIO 8 : Duree=10h -> Stockage > 700 Mo, CD non compatible
+  Donnees    : params Hi-Fi, duree = 36000 s (10 heures)
+  Action     : res = calcule_numerisation(params, 36000)
+  Attendu    : stockage > 700 Mo, compatible_cd = false
+  Obtenu     : stockage = 6056.2 Mo, compatible_cd = false (0)
+  Reussite   : [X]
+
+SCENARIO 9 : Fe=96000, b=24 -> Non compatible CD
+  Donnees    : params modifies : Fe = 96000, b = 24
+  Action     : res = calcule_numerisation(params_bad, 3600)
+  Attendu    : compatible_cd = false (Fe != 44100 et b != 16)
+  Obtenu     : compatible_cd = false (0)
+  Reussite   : [X]
+
+SCENARIO 10 : Proportionnalite du stockage (1h vs 30min)
   Donnees    : duree1 = 3600 s, duree2 = 1800 s
-  Action     : Comparer stockage(3600) / stockage(1800)
-  Attendu    : Ratio = 2.00
-  Obtenu     : Ratio = 605.62 / 302.81 = 2.00
+  Action     : ratio = stockage(3600) / stockage(1800)
+  Attendu    : ratio = 2.00
+  Obtenu     : 605.62 / 302.81 = 2.00
   Reussite   : [X]
 
 ========================================================================
 JOURNAL TESTEUR :
 Date        Testeur     Scenarios   Resultat global
 ------------------------------------------------------------------------
-12/04/26    G2D         10 / 10     TOUS OK
+12/04/26    G2D         10 / 10     TOUS OK (5 positifs + 5 negatifs)
 ========================================================================

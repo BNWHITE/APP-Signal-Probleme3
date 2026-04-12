@@ -20,65 +20,65 @@ SCENARIO 1 : Type de sortie
   Obtenu     : params est une structure MATLAB
   Reussite   : [X]
 
-SCENARIO 2 : Frequence minimale
+SCENARIO 2 : Tous les champs requis presents
   Donnees    : Aucune entree
-  Action     : params = lire_parametres_numerisation()
-  Attendu    : params.f_min = 20 Hz
-  Obtenu     : params.f_min = 20 Hz
+  Action     : Verifier 9 champs (f_min, f_max, SNR_cible, V_max, A, P_moy, Fe, b, n_canaux)
+  Attendu    : 9 champs sur 9 presents
+  Obtenu     : 9/9 champs presents
   Reussite   : [X]
 
-SCENARIO 3 : Frequence maximale
+SCENARIO 3 : Frequences f_min et f_max
   Donnees    : Aucune entree
   Action     : params = lire_parametres_numerisation()
-  Attendu    : params.f_max = 20 000 Hz
-  Obtenu     : params.f_max = 20 000 Hz
+  Attendu    : f_min = 20 Hz, f_max = 20 000 Hz
+  Obtenu     : f_min = 20 Hz, f_max = 20 000 Hz
   Reussite   : [X]
 
-SCENARIO 4 : SNR cible
+SCENARIO 4 : Coherence f_min < f_max
   Donnees    : Aucune entree
-  Action     : params = lire_parametres_numerisation()
-  Attendu    : params.SNR_cible = 90 dB
-  Obtenu     : params.SNR_cible = 90 dB
+  Action     : Verifier f_min < f_max
+  Attendu    : 20 < 20 000 (vrai)
+  Obtenu     : 20 < 20 000 (vrai)
   Reussite   : [X]
 
-SCENARIO 5 : Tension crete
+SCENARIO 5 : Coherence A = 2*V_max
   Donnees    : Aucune entree
-  Action     : params = lire_parametres_numerisation()
-  Attendu    : params.V_max = 0.5 V (= 500 mV)
-  Obtenu     : params.V_max = 0.5 V
+  Action     : Verifier A == 2 * V_max
+  Attendu    : A = 1 V, 2*V_max = 2*0.5 = 1 V
+  Obtenu     : A = 1 V, 2*V_max = 1 V (identiques)
   Reussite   : [X]
 
-SCENARIO 6 : Dynamique totale
+SCENARIO 6 : Puissance physiquement positive
   Donnees    : Aucune entree
-  Action     : params = lire_parametres_numerisation()
-  Attendu    : params.A = 2 * V_max = 1 V
-  Obtenu     : params.A = 1 V
+  Action     : Verifier P_moy > 0
+  Attendu    : P_moy = 0.030 W > 0
+  Obtenu     : P_moy = 0.030 W > 0
   Reussite   : [X]
 
-SCENARIO 7 : Puissance moyenne
+SCENARIO 7 : Shannon respecte (Fe >= 2*f_max)
   Donnees    : Aucune entree
-  Action     : params = lire_parametres_numerisation()
-  Attendu    : params.P_moy = 30 mW = 0.030 W
-  Obtenu     : params.P_moy = 0.030 W
+  Action     : Verifier Fe >= 2*f_max = 40 000 Hz
+  Attendu    : Fe = 44 100 Hz >= 40 000 Hz
+  Obtenu     : Fe = 44 100 Hz >= 40 000 Hz
   Reussite   : [X]
 
-SCENARIO 8 : Shannon respecte (Fe >= 2 * f_max)
+SCENARIO 8 : Marge au-dessus de Shannon (Fe > 2*f_max)
   Donnees    : Aucune entree
-  Action     : params = lire_parametres_numerisation()
-  Attendu    : params.Fe >= 2 * 20000 = 40 000 Hz
-  Obtenu     : params.Fe = 44 100 Hz >= 40 000 Hz
+  Action     : Verifier Fe > 2*f_max (marge stricte)
+  Attendu    : 44 100 > 40 000 (marge = 4 100 Hz)
+  Obtenu     : marge = 4 100 Hz > 0
   Reussite   : [X]
 
-SCENARIO 9 : Nombre de bits suffisant (b >= 16)
+SCENARIO 9 : Nombre de bits >= 16
   Donnees    : Aucune entree
-  Action     : params = lire_parametres_numerisation()
-  Attendu    : params.b >= 16 bits
-  Obtenu     : params.b = 16 bits
+  Action     : Verifier b >= 16
+  Attendu    : b = 16 >= 16
+  Obtenu     : b = 16
   Reussite   : [X]
 
-SCENARIO 10 : SNR atteint avec ces parametres
+SCENARIO 10 : SNR obtenu atteint la cible
   Donnees    : q = 1/2^16 = 1.5259e-05 V, Pe = q^2/12 = 1.9403e-11 W
-  Action     : SNR = 10*log10(0.030 / 1.9403e-11) = 91.89 dB
+  Action     : SNR = 10*log10(0.030 / 1.9403e-11)
   Attendu    : SNR >= 90 dB
   Obtenu     : SNR = 91.89 dB >= 90 dB
   Reussite   : [X]

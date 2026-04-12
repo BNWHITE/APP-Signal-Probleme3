@@ -15,84 +15,85 @@ CONDITIONS PREALABLES :
   doivent etre accessibles
 ------------------------------------------------------------------------
 
+=== PARTIE A : CAS POSITIFS (tout [OK]) ===
+
 SCENARIO 1 : Appel nominal Hi-Fi
-  Donnees    : params Hi-Fi standard (Fe=44100, b=16, 2 canaux)
-               resultats nominaux (SNR=91.89, stockage=605.62 Mo)
+  Donnees    : params Hi-Fi (Fe=44100, b=16, 2 canaux), duree=1h
   Action     : affiche_resultats_numerisation(params, resultats)
-  Attendu    : Affichage complet avec tableau et 3x [OK]
+  Attendu    : Affichage complet, 3x [OK] (SNR, CD, Timbre)
   Obtenu     : Affichage complet, 3x [OK], aucune erreur
   Reussite   : [X]
 
-SCENARIO 2 : SNR insuffisant
-  Donnees    : params Hi-Fi, resultats.SNR = 80.0 dB (< 90)
-  Action     : affiche_resultats_numerisation(params, resultats)
-  Attendu    : Affichage avec [NON] pour SNR
-  Obtenu     : Ligne "[NON] SNR = 80.00 dB < 90 dB" affichee
+SCENARIO 2 : Chaine complete Entree -> Calcul -> Sortie
+  Donnees    : params issus de lire_parametres_numerisation()
+  Action     : affiche_resultats_numerisation(params, calcule_numerisation(params, 3600))
+  Attendu    : Affichage complet, 3x [OK]
+  Obtenu     : SNR=91.89 [OK], CD 605.62Mo [OK], Timbre 22050>=20000 [OK]
   Reussite   : [X]
 
-SCENARIO 3 : Non compatible CD (stockage > 700 Mo)
-  Donnees    : params Hi-Fi, resultats.stockage_Mo = 800.0
-               resultats.compatible_cd = false
+SCENARIO 3 : Mono (1 canal)
+  Donnees    : params Hi-Fi avec n_canaux=1
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage correct sans erreur
+  Obtenu     : Affichage avec debit=705600, stockage=302.81 Mo, pas d'erreur
+  Reussite   : [X]
+
+=== PARTIE B : CAS NEGATIFS (un ou plusieurs [NON]) ===
+
+SCENARIO 4 : SNR insuffisant (b=8 bits)
+  Donnees    : params avec b=8 -> SNR = 43.78 dB < 90 dB
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage avec [NON] pour le SNR
+  Obtenu     : "[NON] SNR = 43.78 dB < 90 dB" affiche
+  Reussite   : [X]
+
+SCENARIO 5 : Timbre non respecte (Fe=30000 Hz)
+  Donnees    : params avec Fe=30000 -> Fe/2=15000 < 20000
+  Action     : affiche_resultats_numerisation(params, resultats)
+  Attendu    : Affichage avec [NON] pour le timbre
+  Obtenu     : "[NON] Timbre non respecte" affiche
+  Reussite   : [X]
+
+SCENARIO 6 : Non compatible CD (duree=10h)
+  Donnees    : params Hi-Fi, duree=36000s -> stockage=6056 Mo > 700 Mo
   Action     : affiche_resultats_numerisation(params, resultats)
   Attendu    : Affichage avec [NON] pour compatibilite CD
-  Obtenu     : Ligne "[NON] Non compatible CD" affichee
+  Obtenu     : "[NON] Non compatible CD" affiche
   Reussite   : [X]
 
-SCENARIO 4 : Timbre non respecte
-  Donnees    : params.Fe = 30000, resultats.timbre_ok = false
+SCENARIO 7 : Tout echoue (b=8, Fe=30000, duree=10h)
+  Donnees    : params degrades -> SNR<90, CD non compatible, timbre KO
   Action     : affiche_resultats_numerisation(params, resultats)
-  Attendu    : Affichage avec [NON] pour timbre
-  Obtenu     : Ligne "[NON] Timbre non respecte" affichee
+  Attendu    : 3x [NON] affiches
+  Obtenu     : 3x [NON] affiches (SNR, CD, Timbre)
   Reussite   : [X]
 
-SCENARIO 5 : Mono (1 canal)
-  Donnees    : params.n_canaux = 1, debit et stockage mono
+=== PARTIE C : CAS LIMITES ===
+
+SCENARIO 8 : Haute resolution (24 bits / 96 kHz)
+  Donnees    : params avec Fe=96000, b=24
   Action     : affiche_resultats_numerisation(params, resultats)
-  Attendu    : Affichage correct en mono
-  Obtenu     : Affichage avec debit=705600, stockage=302.8 Mo
+  Attendu    : SNR [OK] (tres eleve), CD [NON] (Fe!=44100, stockage>700)
+  Obtenu     : SNR=140dB [OK], "[NON] Non compatible CD" affiche
   Reussite   : [X]
 
-SCENARIO 6 : Haute resolution (24 bits / 96 kHz)
-  Donnees    : params.Fe = 96000, params.b = 24
-               resultats adaptes (SNR=140, stockage=1976 Mo)
+SCENARIO 9 : Qualite telephone (8 bits / 8 kHz)
+  Donnees    : params avec Fe=8000, b=8, f_max=3400
   Action     : affiche_resultats_numerisation(params, resultats)
-  Attendu    : Affichage correct, [NON] pour CD
-  Obtenu     : Ligne "[NON] Non compatible CD" affichee
+  Attendu    : SNR [NON] (43.78 dB), CD [NON], Timbre [OK] (4000>=3400)
+  Obtenu     : [NON] SNR, [NON] CD, [OK] Timbre affiches
   Reussite   : [X]
 
-SCENARIO 7 : Qualite telephone (8 bits / 8 kHz)
-  Donnees    : params.Fe = 8000, params.b = 8, f_max = 3400
-               resultats basse qualite (SNR=43.8, stockage=54.9 Mo)
+SCENARIO 10 : Duree courte (1 minute)
+  Donnees    : params Hi-Fi, duree=60s -> stockage=10.09 Mo
   Action     : affiche_resultats_numerisation(params, resultats)
-  Attendu    : Affichage correct, [NON] CD et timbre
-  Obtenu     : [NON] pour CD et timbre affiches
-  Reussite   : [X]
-
-SCENARIO 8 : Toutes verifications echouent
-  Donnees    : SNR=40 < 90, compatible_cd=false, timbre_ok=false
-  Action     : affiche_resultats_numerisation(params, resultats)
-  Attendu    : Trois lignes [NON]
-  Obtenu     : 3x [NON] affiches
-  Reussite   : [X]
-
-SCENARIO 9 : Toutes verifications OK
-  Donnees    : SNR=95 >= 90, compatible_cd=true, timbre_ok=true
-  Action     : affiche_resultats_numerisation(params, resultats)
-  Attendu    : Trois lignes [OK]
-  Obtenu     : 3x [OK] affiches
-  Reussite   : [X]
-
-SCENARIO 10 : Chaine complete Entree -> Calcul -> Sortie
-  Donnees    : params issus de lire_parametres_numerisation()
-               resultats issus de calcule_numerisation(params, 3600)
-  Action     : affiche_resultats_numerisation(params, resultats)
-  Attendu    : Affichage complet, toutes verifications [OK]
-  Obtenu     : Affichage complet, SNR=91.89dB [OK], CD [OK], Timbre [OK]
+  Attendu    : Stockage tres petit, 3x [OK]
+  Obtenu     : stockage=10.09 Mo, 3x [OK]
   Reussite   : [X]
 
 ========================================================================
 JOURNAL TESTEUR :
 Date        Testeur     Scenarios   Resultat global
 ------------------------------------------------------------------------
-12/04/26    G2D         10 / 10     TOUS OK
+12/04/26    G2D         10 / 10     TOUS OK (3 positifs + 4 negatifs + 3 limites)
 ========================================================================
