@@ -12,7 +12,6 @@ Enregistrement numérique Hi-Fi :
 APP-Signal-Probleme3/
 ├── main.m                                          # Script principal (E → C → S)
 ├── README.md
-├── .gitignore
 │
 ├── lire_parametres_numerisation/                   # ENTRÉE
 │   ├── lire_parametres_numerisation.m              # Fonction (pas d'entrée → params)
