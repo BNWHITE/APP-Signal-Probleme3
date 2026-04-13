@@ -36,7 +36,7 @@ APP-Signal-Probleme3/
 
 ```matlab
 % Depuis la racine du projet :
-resultat-test-complet
+rendu-test-complets
 ```
 
 Ou pour exécuter les tests d'un module :
